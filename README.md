@@ -11,7 +11,7 @@
 
 通过Github Pages网址访问：
 ```
-https://<你的用户名>.github.io/HSR-LD-Searcher/
+https://wait1nggg.github.io/HSR-LD-Searcher/
 ```
 
 ## 声明
