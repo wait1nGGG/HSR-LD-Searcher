@@ -321,6 +321,24 @@ html {
 .bgm-btn:hover { background: #1c2333; border-color: #58a6ff; }
 .bgm-btn.muted { color: #6e7681; }
 
+.gh-btn {
+  position: fixed;
+  top: 16px;
+  right: 60px;
+  z-index: 999;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background: #161b22;
+  color: #c9d1d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.15s;
+}
+.gh-btn:hover { background: #1c2333; border-color: #58a6ff; color: #fff; }
+
 @media (max-width: 768px) {
   .char { padding: 32px 16px 16px; }
   .logo { font-size: 24px; }
