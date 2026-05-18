@@ -1,9 +1,3 @@
 .DS_Store
 server.js
 editor.html
-css/editor.css
-js/editor.js
-import.html
-css/import.css
-js/import.js
-data/characters.json

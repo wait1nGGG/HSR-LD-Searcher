@@ -1,19 +1,110 @@
 [
-  { "id": "cyberangel", "title": "Cyberangel", "file1x": "assets/music/Cyberangel.mp3", "file2x": "assets/music_2x/Cyberangel_2x.mp3" },
-  { "id": "see-you-again", "title": "See You Again", "file1x": "assets/music/See You Again.mp3", "file2x": "assets/music_2x/See You Again_2x.mp3" },
-  { "id": "下一个天亮", "title": "下一个天亮", "file1x": "assets/music/下一个天亮.mp3", "file2x": "assets/music_2x/下一个天亮_2x.mp3" },
-  { "id": "不乱不破", "title": "不乱不破", "file1x": "assets/music/不乱不破.mp3", "file2x": "assets/music_2x/不乱不破_2x.mp3" },
-  { "id": "不眠之夜", "title": "不眠之夜", "file1x": "assets/music/不眠之夜.mp3", "file2x": "assets/music_2x/不眠之夜_2x.mp3" },
-  { "id": "何者", "title": "何者", "file1x": "assets/music/何者.mp3", "file2x": "assets/music_2x/何者_2x.mp3" },
-  { "id": "使一颗心免于哀伤", "title": "使一颗心免于哀伤", "file1x": "assets/music/使一颗心免于哀伤.mp3", "file2x": "assets/music_2x/使一颗心免于哀伤_2x.mp3" },
-  { "id": "在银河中孤独摇摆", "title": "在银河中孤独摇摆", "file1x": "assets/music/在银河中孤独摇摆.mp3", "file2x": "assets/music_2x/在银河中孤独摇摆_2x.mp3" },
-  { "id": "天生鬼才", "title": "天生鬼才", "file1x": "assets/music/天生鬼才.mp3", "file2x": "assets/music_2x/天生鬼才_2x.mp3" },
-  { "id": "希望有羽毛和翅膀", "title": "希望有羽毛和翅膀", "file1x": "assets/music/希望有羽毛和翅膀.mp3", "file2x": "assets/music_2x/希望有羽毛和翅膀_2x.mp3" },
-  { "id": "拂晓", "title": "拂晓", "file1x": "assets/music/拂晓.mp3", "file2x": "assets/music_2x/拂晓_2x.mp3" },
-  { "id": "昔涟", "title": "昔涟", "file1x": "assets/music/昔涟.mp3", "file2x": "assets/music_2x/昔涟_2x.mp3" },
-  { "id": "水龙吟", "title": "水龙吟", "file1x": "assets/music/水龙吟.mp3", "file2x": "assets/music_2x/水龙吟_2x.mp3" },
-  { "id": "耀斑", "title": "耀斑", "file1x": "assets/music/耀斑.mp3", "file2x": "assets/music_2x/耀斑_2x.mp3" },
-  { "id": "若我不曾见过太阳", "title": "若我不曾见过太阳", "file1x": "assets/music/若我不曾见过太阳.mp3", "file2x": "assets/music_2x/若我不曾见过太阳_2x.mp3" },
-  { "id": "踏上旅途", "title": "踏上旅途", "file1x": "assets/music/踏上旅途.mp3", "file2x": "assets/music_2x/踏上旅途_2x.mp3" },
-  { "id": "野火", "title": "野火", "file1x": "assets/music/野火.mp3", "file2x": "assets/music_2x/野火_2x.mp3" }
+  {
+    "id": "cyberangel",
+    "title": "Cyberangel",
+    "file1x": "assets/music/Cyberangel.mp3",
+    "file2x": "assets/music_2x/Cyberangel_2x.mp3"
+  },
+  {
+    "id": "see-you-again",
+    "title": "See You Again",
+    "file1x": "assets/music/See You Again.mp3",
+    "file2x": "assets/music_2x/See You Again_2x.mp3"
+  },
+  {
+    "id": "下一个天亮",
+    "title": "下一个天亮",
+    "file1x": "assets/music/下一个天亮.mp3",
+    "file2x": "assets/music_2x/下一个天亮_2x.mp3"
+  },
+  {
+    "id": "不乱不破",
+    "title": "不乱不破",
+    "file1x": "assets/music/不乱不破.mp3",
+    "file2x": "assets/music_2x/不乱不破_2x.mp3"
+  },
+  {
+    "id": "不眠之夜",
+    "title": "不眠之夜",
+    "file1x": "assets/music/不眠之夜.mp3",
+    "file2x": "assets/music_2x/不眠之夜_2x.mp3"
+  },
+  {
+    "id": "何者",
+    "title": "何者",
+    "file1x": "assets/music/何者.mp3",
+    "file2x": "assets/music_2x/何者_2x.mp3"
+  },
+  {
+    "id": "使一颗心免于哀伤",
+    "title": "使一颗心免于哀伤",
+    "file1x": "assets/music/使一颗心免于哀伤.mp3",
+    "file2x": "assets/music_2x/使一颗心免于哀伤_2x.mp3"
+  },
+  {
+    "id": "在银河中孤独摇摆",
+    "title": "在银河中孤独摇摆",
+    "file1x": "assets/music/在银河中孤独摇摆.mp3",
+    "file2x": "assets/music_2x/在银河中孤独摇摆_2x.mp3"
+  },
+  {
+    "id": "天生鬼才",
+    "title": "天生鬼才",
+    "file1x": "assets/music/天生鬼才.mp3",
+    "file2x": "assets/music_2x/天生鬼才_2x.mp3"
+  },
+  {
+    "id": "希望有羽毛和翅膀",
+    "title": "希望有羽毛和翅膀",
+    "file1x": "assets/music/希望有羽毛和翅膀.mp3",
+    "file2x": "assets/music_2x/希望有羽毛和翅膀_2x.mp3"
+  },
+  {
+    "id": "拂晓",
+    "title": "拂晓",
+    "file1x": "assets/music/拂晓.mp3",
+    "file2x": "assets/music_2x/拂晓_2x.mp3"
+  },
+  {
+    "id": "昔涟",
+    "title": "昔涟",
+    "file1x": "assets/music/昔涟.mp3",
+    "file2x": "assets/music_2x/昔涟_2x.mp3"
+  },
+  {
+    "id": "水龙吟",
+    "title": "水龙吟",
+    "file1x": "assets/music/水龙吟.mp3",
+    "file2x": "assets/music_2x/水龙吟_2x.mp3"
+  },
+  {
+    "id": "耀斑",
+    "title": "耀斑",
+    "file1x": "assets/music/耀斑.mp3",
+    "file2x": "assets/music_2x/耀斑_2x.mp3"
+  },
+  {
+    "id": "若我不曾见过太阳",
+    "title": "若我不曾见过太阳",
+    "file1x": "assets/music/若我不曾见过太阳.mp3",
+    "file2x": "assets/music_2x/若我不曾见过太阳_2x.mp3"
+  },
+  {
+    "id": "踏上旅途",
+    "title": "踏上旅途",
+    "file1x": "assets/music/踏上旅途.mp3",
+    "file2x": "assets/music_2x/踏上旅途_2x.mp3"
+  },
+  {
+    "id": "野火",
+    "title": "野火",
+    "file1x": "assets/music/野火.mp3",
+    "file2x": "assets/music_2x/野火_2x.mp3"
+  },
+  {
+    "id": "星间旅行",
+    "title": "星间旅行",
+    "file1x": "assets/music/星间旅行.mp3",
+    "file2x": "assets/music_2x/星间旅行_2x.mp3"
+  }
 ]
