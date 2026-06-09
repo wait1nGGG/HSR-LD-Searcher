@@ -32,9 +32,23 @@
     <div class="modal-backdrop" id="modalBackdrop"></div>
     <div class="modal-container">
       <button class="modal-close" id="modalClose">✕</button>
-      <img id="modalImage" class="modal-image" src="" alt="">
+      <div class="modal-image-wrap" id="modalImageWrap">
+        <img id="modalImage" class="modal-image" src="" alt="">
+        <div class="modal-overlays" id="modalOverlays"></div>
+      </div>
       <div class="modal-footer">
         <button id="modalDownload" class="download-btn">下载</button>
+        <button id="modalEdit" class="edit-btn">✏️ 编辑</button>
+      </div>
+      <div class="edit-bar hidden" id="editBar">
+        <div class="edit-controls">
+          <label class="edit-label">大小</label>
+          <input type="range" id="fontSizeRange" class="edit-range" min="12" max="120" value="36">
+          <span class="edit-range-val" id="fontSizeVal">36</span>
+          <label class="edit-label">颜色</label>
+          <input type="color" id="fontColorPicker" class="edit-color" value="#ffffff">
+          <button id="deleteTextBtn" class="edit-del-btn" title="删除选中文字">🗑</button>
+        </div>
       </div>
     </div>
   </div>

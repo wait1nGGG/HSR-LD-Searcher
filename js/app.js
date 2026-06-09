@@ -18,7 +18,15 @@
     modalBackdrop: document.getElementById('modalBackdrop'),
     modalImage: document.getElementById('modalImage'),
     modalClose: document.getElementById('modalClose'),
-    modalDownload: document.getElementById('modalDownload')
+    modalDownload: document.getElementById('modalDownload'),
+    modalEdit: document.getElementById('modalEdit'),
+    editBar: document.getElementById('editBar'),
+    fontSizeRange: document.getElementById('fontSizeRange'),
+    fontSizeVal: document.getElementById('fontSizeVal'),
+    fontColorPicker: document.getElementById('fontColorPicker'),
+    deleteTextBtn: document.getElementById('deleteTextBtn'),
+    modalOverlays: document.getElementById('modalOverlays'),
+    modalImageWrap: document.getElementById('modalImageWrap')
   };
 
   async function init() {
@@ -89,17 +97,309 @@
   }
 
   // ─── 灯箱 ───
+  let editMode = false;
+  let selectedTextId = null;
+  let textItems = [];
+  let textIdCounter = 0;
+  let dragState = null; // { id, startX, startY, origX, origY }
+
   function openModal(idx) {
     const img = filtered[idx];
     if (!img) return;
     dom.modalImage.src = 'assets/images/' + img.filename;
     dom.modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    resetEditState();
   }
 
   function closeModal() {
     dom.modal.classList.add('hidden');
     document.body.style.overflow = '';
+    resetEditState();
+  }
+
+  function resetEditState() {
+    editMode = false;
+    selectedTextId = null;
+    textItems = [];
+    textIdCounter = 0;
+    dragState = null;
+    dom.modalEdit.classList.remove('active');
+    dom.modalEdit.textContent = '✏️ 编辑';
+    dom.editBar.classList.add('hidden');
+    dom.modalOverlays.innerHTML = '';
+  }
+
+  // ─── 编辑模式 ───
+  function toggleEditMode() {
+    editMode = !editMode;
+    dom.modalEdit.classList.toggle('active', editMode);
+    dom.modalEdit.textContent = editMode ? '✔ 完成' : '✏️ 编辑';
+    dom.editBar.classList.toggle('hidden', !editMode);
+    if (!editMode) {
+      deselectText();
+      // Commit any in-progress edit
+      document.querySelectorAll('.text-overlay-item.editing').forEach(el => {
+        commitTextEdit(el);
+      });
+    }
+  }
+
+  function getImageContentBounds() {
+    const img = dom.modalImage;
+    const cw = img.clientWidth;
+    const ch = img.clientHeight;
+    const nw = img.naturalWidth;
+    const nh = img.naturalHeight;
+    if (!nw || !nh) return { left: 0, top: 0, width: cw, height: ch, scale: 1 };
+    const scale = Math.min(cw / nw, ch / nh);
+    return {
+      left: (cw - nw * scale) / 2,
+      top: (ch - nh * scale) / 2,
+      width: nw * scale,
+      height: nh * scale,
+      scale
+    };
+  }
+
+  function addText(xFrac, yFrac) {
+    const item = {
+      id: ++textIdCounter,
+      text: '输入文字',
+      x: xFrac,
+      y: yFrac,
+      fontSize: 36,
+      color: '#ffffff'
+    };
+    textItems.push(item);
+    renderTextItem(item, true); // render and focus
+    selectText(item.id);
+    // Update controls to defaults
+    dom.fontSizeRange.value = item.fontSize;
+    dom.fontSizeVal.textContent = item.fontSize;
+    dom.fontColorPicker.value = item.color;
+  }
+
+  function renderTextItem(item, autoFocus) {
+    const bounds = getImageContentBounds();
+    const wrap = dom.modalOverlays;
+
+    const el = document.createElement('div');
+    el.className = 'text-overlay-item';
+    el.dataset.textId = item.id;
+    el.textContent = item.text;
+    el.style.left = (bounds.left + item.x * bounds.width) + 'px';
+    el.style.top = (bounds.top + item.y * bounds.height) + 'px';
+    el.style.fontSize = item.fontSize + 'px';
+    el.style.color = item.color;
+    el.style.textShadow = '0 1px 4px rgba(0,0,0,0.8)';
+
+    // Drag handle
+    const handle = document.createElement('div');
+    handle.className = 'drag-handle';
+    el.appendChild(handle);
+
+    // Mousedown → select or start drag
+    el.addEventListener('mousedown', onTextMouseDown);
+    // Double-click → edit
+    el.addEventListener('dblclick', onTextDblClick);
+    // Click (bubbled from content)
+    el.addEventListener('click', (e) => e.stopPropagation());
+
+    wrap.appendChild(el);
+
+    if (autoFocus) {
+      onTextDblClick({ currentTarget: el, target: el });
+    }
+  }
+
+  function selectText(id) {
+    deselectText();
+    selectedTextId = id;
+    document.querySelectorAll('.text-overlay-item').forEach(el => {
+      if (parseInt(el.dataset.textId) === id) {
+        el.classList.add('selected');
+      }
+    });
+    // Update controls from item
+    const item = textItems.find(i => i.id === id);
+    if (item) {
+      dom.fontSizeRange.value = item.fontSize;
+      dom.fontSizeVal.textContent = item.fontSize;
+      dom.fontColorPicker.value = item.color;
+    }
+  }
+
+  function deselectText() {
+    selectedTextId = null;
+    document.querySelectorAll('.text-overlay-item.selected').forEach(el => {
+      el.classList.remove('selected');
+    });
+  }
+
+  function onTextMouseDown(e) {
+    if (e.button !== 0) return;
+    const el = e.currentTarget;
+    const id = parseInt(el.dataset.textId);
+    const item = textItems.find(i => i.id === id);
+    if (!item) return;
+
+    // If editing (content editable), don't drag
+    if (el.classList.contains('editing')) return;
+
+    e.stopPropagation();
+    selectText(id);
+
+    const rect = dom.modalOverlays.getBoundingClientRect();
+    const bounds = getImageContentBounds();
+    dragState = {
+      id,
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: item.x,
+      origY: item.y,
+      moved: false,
+      rect,
+      bounds
+    };
+
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+  }
+
+  function onDragMove(e) {
+    if (!dragState) return;
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragState.moved = true;
+    if (!dragState.moved) return;
+
+    const bounds = dragState.bounds;
+    const item = textItems.find(i => i.id === dragState.id);
+    if (!item) return;
+
+    let newX = dragState.origX + dx / bounds.width;
+    let newY = dragState.origY + dy / bounds.height;
+    // Clamp to [0, 1]
+    newX = Math.max(0, Math.min(1, newX));
+    newY = Math.max(0, Math.min(1, newY));
+    item.x = newX;
+    item.y = newY;
+
+    // Update position
+    const el = document.querySelector(`.text-overlay-item[data-text-id="${item.id}"]`);
+    if (el) {
+      el.style.left = (bounds.left + newX * bounds.width) + 'px';
+      el.style.top = (bounds.top + newY * bounds.height) + 'px';
+    }
+  }
+
+  function onDragEnd() {
+    document.removeEventListener('mousemove', onDragMove);
+    document.removeEventListener('mouseup', onDragEnd);
+    if (dragState && !dragState.moved) {
+      // It was a click, not a drag — if not editing, make editable
+      const el = document.querySelector(`.text-overlay-item[data-text-id="${dragState.id}"]`);
+      if (el && !el.classList.contains('editing')) {
+        onTextDblClick({ currentTarget: el });
+      }
+    }
+    dragState = null;
+  }
+
+  function onTextDblClick(e) {
+    const el = e.currentTarget;
+    if (el.classList.contains('editing')) return;
+    el.classList.add('editing');
+    el.contentEditable = true;
+    el.focus();
+    // Select all text
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    // On blur → commit text and exit editing
+    el.addEventListener('blur', function onBlur() {
+      el.removeEventListener('blur', onBlur);
+      commitTextEdit(el);
+    }, { once: true });
+
+    // Enter → commit text
+    el.addEventListener('keydown', function onKeydown(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        el.removeEventListener('keydown', onKeydown);
+        el.blur();
+      }
+    });
+  }
+
+  function commitTextEdit(el) {
+    const id = parseInt(el.dataset.textId);
+    const item = textItems.find(i => i.id === id);
+    if (!item) return;
+    item.text = el.textContent || '文字';
+    el.textContent = item.text; // sync in case it changed
+    el.classList.remove('editing');
+    el.contentEditable = false;
+  }
+
+  // ─── 编辑控件 ───
+  function updateFontSize(val) {
+    const size = parseInt(val);
+    dom.fontSizeVal.textContent = size;
+    if (selectedTextId === null) return;
+    const item = textItems.find(i => i.id === selectedTextId);
+    if (!item) return;
+    item.fontSize = size;
+    const el = document.querySelector(`.text-overlay-item[data-text-id="${item.id}"]`);
+    if (el) el.style.fontSize = size + 'px';
+  }
+
+  function updateFontColor(val) {
+    if (selectedTextId === null) return;
+    const item = textItems.find(i => i.id === selectedTextId);
+    if (!item) return;
+    item.color = val;
+    const el = document.querySelector(`.text-overlay-item[data-text-id="${item.id}"]`);
+    if (el) el.style.color = val;
+  }
+
+  function deleteSelectedText() {
+    if (selectedTextId === null) return;
+    textItems = textItems.filter(i => i.id !== selectedTextId);
+    const el = document.querySelector(`.text-overlay-item[data-text-id="${selectedTextId}"]`);
+    if (el) el.remove();
+    selectedTextId = null;
+  }
+
+  // ─── 点击图片添加文字 ───
+  function onImageWrapClick(e) {
+    if (!editMode) return;
+    // Ignore clicks on text items
+    if (e.target.closest('.text-overlay-item')) return;
+
+    const rect = dom.modalOverlays.getBoundingClientRect();
+    const bounds = getImageContentBounds();
+    const x = (e.clientX - rect.left - bounds.left) / bounds.width;
+    const y = (e.clientY - rect.top - bounds.top) / bounds.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return; // clicked outside image content
+    addText(Math.max(0, Math.min(1, x)), Math.max(0, Math.min(1, y)));
+  }
+
+  // ─── 更新文字位置（窗口大小变化时） ───
+  function repositionTextItems() {
+    const bounds = getImageContentBounds();
+    if (bounds.width === 0 || bounds.height === 0) return;
+    textItems.forEach(item => {
+      const el = document.querySelector(`.text-overlay-item[data-text-id="${item.id}"]`);
+      if (el) {
+        el.style.left = (bounds.left + item.x * bounds.width) + 'px';
+        el.style.top = (bounds.top + item.y * bounds.height) + 'px';
+      }
+    });
   }
 
   async function doDownload() {
@@ -203,6 +503,26 @@
   dom.modalDownload.addEventListener('click', doDownload);
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !dom.modal.classList.contains('hidden')) closeModal();
+  });
+
+  // ─── 编辑事件 ───
+  dom.modalEdit.addEventListener('click', toggleEditMode);
+  dom.fontSizeRange.addEventListener('input', () => updateFontSize(dom.fontSizeRange.value));
+  dom.fontColorPicker.addEventListener('input', () => updateFontColor(dom.fontColorPicker.value));
+  dom.deleteTextBtn.addEventListener('click', deleteSelectedText);
+  dom.modalImageWrap.addEventListener('click', onImageWrapClick);
+
+  // Image load → reposition overlays
+  dom.modalImage.addEventListener('load', () => {
+    // Wait for layout to settle
+    requestAnimationFrame(() => repositionTextItems());
+  });
+
+  // Window resize → reposition overlays
+  window.addEventListener('resize', () => {
+    if (!dom.modal.classList.contains('hidden')) {
+      repositionTextItems();
+    }
   });
 
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
