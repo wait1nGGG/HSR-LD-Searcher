@@ -299,6 +299,151 @@ html {
 
 .mu-icon { font-size: 10px; }
 
+/* ── 编辑模式 ── */
+.edit-btn {
+  padding: 8px 16px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  color: #c9d1d9;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-right: auto;
+  transition: 0.15s;
+}
+.edit-btn:hover { background: #30363d; color: #e6edf3; }
+.edit-btn.active { background: #238636; border-color: #2ea043; color: #fff; }
+
+.edit-bar {
+  border-top: 1px solid #30363d;
+  background: #1c2333;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+}
+.edit-bar.hidden { display: none; }
+
+.edit-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.edit-label {
+  font-size: 12px;
+  color: #8b949e;
+  white-space: nowrap;
+}
+
+.edit-range {
+  width: 100px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #30363d;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.edit-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #58a6ff;
+  border: 2px solid #0d1117;
+  cursor: pointer;
+}
+.edit-range-val {
+  font-size: 13px;
+  color: #c9d1d9;
+  min-width: 28px;
+  text-align: center;
+}
+
+.edit-color {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 2px;
+  background: #0d1117;
+  cursor: pointer;
+}
+.edit-color::-webkit-color-swatch-wrapper { padding: 0; }
+.edit-color::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+.edit-del-btn {
+  padding: 4px 10px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background: #0d1117;
+  color: #f85149;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-left: auto;
+  transition: 0.15s;
+}
+.edit-del-btn:hover { background: #3d1a1a; border-color: #f85149; }
+
+/* ── 图片文字遮罩 ── */
+.modal-image-wrap {
+  position: relative;
+}
+
+.modal-overlays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.text-overlay-item {
+  position: absolute;
+  pointer-events: auto;
+  cursor: move;
+  padding: 4px 8px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.2;
+  white-space: nowrap;
+  user-select: none;
+  transition: border-color 0.15s;
+  min-width: 20px;
+  min-height: 20px;
+}
+.text-overlay-item.selected {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 1px rgba(88,166,255,0.3);
+}
+.text-overlay-item.editing {
+  cursor: text;
+  user-select: text;
+  outline: none;
+  border-color: #58a6ff;
+  background: rgba(0,0,0,0.3);
+}
+.text-overlay-item .drag-handle {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 6px;
+  background: #58a6ff;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.text-overlay-item.selected .drag-handle { opacity: 1; }
+
 /* ── 背景音乐按钮 ── */
 .bgm-btn {
   position: fixed;
