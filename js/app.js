@@ -403,14 +403,42 @@
   }
 
   async function doDownload() {
+    const img = dom.modalImage;
+    if (editMode && textItems.length > 0) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const bounds = getImageContentBounds();
+        const scale = img.naturalWidth / bounds.width;
+        textItems.forEach(item => {
+          const fontSize = item.fontSize * scale;
+          ctx.font = fontSize + 'px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+          ctx.fillStyle = item.color;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = 'rgba(0,0,0,0.8)';
+          ctx.shadowBlur = fontSize * 0.15;
+          ctx.fillText(item.text, item.x * img.naturalWidth, item.y * img.naturalHeight);
+        });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const u = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = u; a.download = 'image.png'; a.click();
+        URL.revokeObjectURL(u);
+        return;
+      } catch { /* fallthrough */ }
+    }
     try {
-      const r = await fetch(dom.modalImage.src);
+      const r = await fetch(img.src);
       const b = await r.blob();
       const u = URL.createObjectURL(b);
       const a = document.createElement('a');
       a.href = u; a.download = 'image.jpg'; a.click();
       URL.revokeObjectURL(u);
-    } catch { window.open(dom.modalImage.src, '_blank'); }
+    } catch { window.open(img.src, '_blank'); }
   }
 
   // ─── 音乐搜索 ───

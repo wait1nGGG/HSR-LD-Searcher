@@ -310,7 +310,7 @@ html {
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  margin-right: auto;
+  margin-right: 12px;
   transition: 0.15s;
 }
 .edit-btn:hover { background: #30363d; color: #e6edf3; }
