@@ -10,6 +10,8 @@
   let imageData = [];
   let musicData = [];
   let filtered = [];
+
+  // ── 查看灯箱 ──
   const dom = {
     modeTabs: document.getElementById('modeTabs'),
     search: document.getElementById('search'),
@@ -20,13 +22,18 @@
     modalClose: document.getElementById('modalClose'),
     modalDownload: document.getElementById('modalDownload'),
     modalEdit: document.getElementById('modalEdit'),
-    editBar: document.getElementById('editBar'),
+    // 编辑灯箱
+    editModal: document.getElementById('editModal'),
+    editBackdrop: document.getElementById('editBackdrop'),
+    editImage: document.getElementById('editImage'),
+    editClose: document.getElementById('editClose'),
+    editDownload: document.getElementById('editDownload'),
+    editImageWrap: document.getElementById('editImageWrap'),
+    editOverlays: document.getElementById('editOverlays'),
     fontSizeRange: document.getElementById('fontSizeRange'),
     fontSizeVal: document.getElementById('fontSizeVal'),
     fontColorPicker: document.getElementById('fontColorPicker'),
-    deleteTextBtn: document.getElementById('deleteTextBtn'),
-    modalOverlays: document.getElementById('modalOverlays'),
-    modalImageWrap: document.getElementById('modalImageWrap')
+    deleteTextBtn: document.getElementById('deleteTextBtn')
   };
 
   async function init() {
@@ -96,57 +103,58 @@
     });
   }
 
-  // ─── 灯箱 ───
-  let editMode = false;
-  let selectedTextId = null;
-  let textItems = [];
-  let textIdCounter = 0;
-  let dragState = null; // { id, startX, startY, origX, origY }
-
+  // ─── 查看灯箱 ───
   function openModal(idx) {
     const img = filtered[idx];
     if (!img) return;
     dom.modalImage.src = 'assets/images/' + img.filename;
     dom.modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    resetEditState();
   }
 
   function closeModal() {
     dom.modal.classList.add('hidden');
     document.body.style.overflow = '';
+  }
+
+  async function doDownload() {
+    try {
+      const r = await fetch(dom.modalImage.src);
+      const b = await r.blob();
+      const u = URL.createObjectURL(b);
+      const a = document.createElement('a');
+      a.href = u; a.download = 'image.jpg'; a.click();
+      URL.revokeObjectURL(u);
+    } catch { window.open(dom.modalImage.src, '_blank'); }
+  }
+
+  // ─── 编辑灯箱 ───
+  let textItems = [];
+  let selectedTextId = null;
+  let textIdCounter = 0;
+  let dragState = null;
+
+  function openEditModal() {
+    dom.editImage.src = dom.modalImage.src;
+    dom.editModal.classList.remove('hidden');
+    resetEditState();
+  }
+
+  function closeEditModal() {
+    dom.editModal.classList.add('hidden');
     resetEditState();
   }
 
   function resetEditState() {
-    editMode = false;
     selectedTextId = null;
     textItems = [];
     textIdCounter = 0;
     dragState = null;
-    dom.modalEdit.classList.remove('active');
-    dom.modalEdit.textContent = '✏️ 编辑';
-    dom.editBar.classList.add('hidden');
-    dom.modalOverlays.innerHTML = '';
-  }
-
-  // ─── 编辑模式 ───
-  function toggleEditMode() {
-    editMode = !editMode;
-    dom.modalEdit.classList.toggle('active', editMode);
-    dom.modalEdit.textContent = editMode ? '✔ 完成' : '✏️ 编辑';
-    dom.editBar.classList.toggle('hidden', !editMode);
-    if (!editMode) {
-      deselectText();
-      // Commit any in-progress edit
-      document.querySelectorAll('.text-overlay-item.editing').forEach(el => {
-        commitTextEdit(el);
-      });
-    }
+    dom.editOverlays.innerHTML = '';
   }
 
   function getImageContentBounds() {
-    const img = dom.modalImage;
+    const img = dom.editImage;
     const cw = img.clientWidth;
     const ch = img.clientHeight;
     const nw = img.naturalWidth;
@@ -172,9 +180,8 @@
       color: '#ffffff'
     };
     textItems.push(item);
-    renderTextItem(item, true); // render and focus
+    renderTextItem(item, true);
     selectText(item.id);
-    // Update controls to defaults
     dom.fontSizeRange.value = item.fontSize;
     dom.fontSizeVal.textContent = item.fontSize;
     dom.fontColorPicker.value = item.color;
@@ -182,7 +189,7 @@
 
   function renderTextItem(item, autoFocus) {
     const bounds = getImageContentBounds();
-    const wrap = dom.modalOverlays;
+    const wrap = dom.editOverlays;
 
     const el = document.createElement('div');
     el.className = 'text-overlay-item';
@@ -194,16 +201,12 @@
     el.style.color = item.color;
     el.style.textShadow = '0 1px 4px rgba(0,0,0,0.8)';
 
-    // Drag handle
     const handle = document.createElement('div');
     handle.className = 'drag-handle';
     el.appendChild(handle);
 
-    // Mousedown → select or start drag
     el.addEventListener('mousedown', onTextMouseDown);
-    // Double-click → edit
     el.addEventListener('dblclick', onTextDblClick);
-    // Click (bubbled from content)
     el.addEventListener('click', (e) => e.stopPropagation());
 
     wrap.appendChild(el);
@@ -221,7 +224,6 @@
         el.classList.add('selected');
       }
     });
-    // Update controls from item
     const item = textItems.find(i => i.id === id);
     if (item) {
       dom.fontSizeRange.value = item.fontSize;
@@ -243,14 +245,12 @@
     const id = parseInt(el.dataset.textId);
     const item = textItems.find(i => i.id === id);
     if (!item) return;
-
-    // If editing (content editable), don't drag
     if (el.classList.contains('editing')) return;
 
     e.stopPropagation();
     selectText(id);
 
-    const rect = dom.modalOverlays.getBoundingClientRect();
+    const rect = dom.editOverlays.getBoundingClientRect();
     const bounds = getImageContentBounds();
     dragState = {
       id,
@@ -280,13 +280,11 @@
 
     let newX = dragState.origX + dx / bounds.width;
     let newY = dragState.origY + dy / bounds.height;
-    // Clamp to [0, 1]
     newX = Math.max(0, Math.min(1, newX));
     newY = Math.max(0, Math.min(1, newY));
     item.x = newX;
     item.y = newY;
 
-    // Update position
     const el = document.querySelector(`.text-overlay-item[data-text-id="${item.id}"]`);
     if (el) {
       el.style.left = (bounds.left + newX * bounds.width) + 'px';
@@ -298,7 +296,6 @@
     document.removeEventListener('mousemove', onDragMove);
     document.removeEventListener('mouseup', onDragEnd);
     if (dragState && !dragState.moved) {
-      // It was a click, not a drag — if not editing, make editable
       const el = document.querySelector(`.text-overlay-item[data-text-id="${dragState.id}"]`);
       if (el && !el.classList.contains('editing')) {
         onTextDblClick({ currentTarget: el });
@@ -313,20 +310,17 @@
     el.classList.add('editing');
     el.contentEditable = true;
     el.focus();
-    // Select all text
     const range = document.createRange();
     range.selectNodeContents(el);
     const sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
 
-    // On blur → commit text and exit editing
     el.addEventListener('blur', function onBlur() {
       el.removeEventListener('blur', onBlur);
       commitTextEdit(el);
     }, { once: true });
 
-    // Enter → commit text
     el.addEventListener('keydown', function onKeydown(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -341,12 +335,11 @@
     const item = textItems.find(i => i.id === id);
     if (!item) return;
     item.text = el.textContent || '文字';
-    el.textContent = item.text; // sync in case it changed
+    el.textContent = item.text;
     el.classList.remove('editing');
     el.contentEditable = false;
   }
 
-  // ─── 编辑控件 ───
   function updateFontSize(val) {
     const size = parseInt(val);
     dom.fontSizeVal.textContent = size;
@@ -375,21 +368,16 @@
     selectedTextId = null;
   }
 
-  // ─── 点击图片添加文字 ───
-  function onImageWrapClick(e) {
-    if (!editMode) return;
-    // Ignore clicks on text items
+  function onEditImageWrapClick(e) {
     if (e.target.closest('.text-overlay-item')) return;
-
-    const rect = dom.modalOverlays.getBoundingClientRect();
+    const rect = dom.editOverlays.getBoundingClientRect();
     const bounds = getImageContentBounds();
     const x = (e.clientX - rect.left - bounds.left) / bounds.width;
     const y = (e.clientY - rect.top - bounds.top) / bounds.height;
-    if (x < 0 || x > 1 || y < 0 || y > 1) return; // clicked outside image content
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
     addText(Math.max(0, Math.min(1, x)), Math.max(0, Math.min(1, y)));
   }
 
-  // ─── 更新文字位置（窗口大小变化时） ───
   function repositionTextItems() {
     const bounds = getImageContentBounds();
     if (bounds.width === 0 || bounds.height === 0) return;
@@ -402,9 +390,9 @@
     });
   }
 
-  async function doDownload() {
-    const img = dom.modalImage;
-    if (editMode && textItems.length > 0) {
+  async function editDoDownload() {
+    const img = dom.editImage;
+    if (textItems.length > 0) {
       try {
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth;
@@ -481,7 +469,6 @@
 
     dom.content.appendChild(list);
 
-    // 下载按钮
     list.querySelectorAll('.mu-btn-dl').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx);
@@ -526,29 +513,36 @@
     switchMode(tab.dataset.mode);
   });
 
+  // ─── 查看灯箱事件 ───
   dom.modalClose.addEventListener('click', closeModal);
   dom.modalBackdrop.addEventListener('click', closeModal);
   dom.modalDownload.addEventListener('click', doDownload);
+  dom.modalEdit.addEventListener('click', openEditModal);
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !dom.modal.classList.contains('hidden')) closeModal();
+    if (e.key === 'Escape') {
+      if (!dom.editModal.classList.contains('hidden')) {
+        closeEditModal();
+      } else if (!dom.modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    }
   });
 
-  // ─── 编辑事件 ───
-  dom.modalEdit.addEventListener('click', toggleEditMode);
+  // ─── 编辑灯箱事件 ───
+  dom.editClose.addEventListener('click', closeEditModal);
+  dom.editBackdrop.addEventListener('click', closeEditModal);
+  dom.editDownload.addEventListener('click', editDoDownload);
   dom.fontSizeRange.addEventListener('input', () => updateFontSize(dom.fontSizeRange.value));
   dom.fontColorPicker.addEventListener('input', () => updateFontColor(dom.fontColorPicker.value));
   dom.deleteTextBtn.addEventListener('click', deleteSelectedText);
-  dom.modalImageWrap.addEventListener('click', onImageWrapClick);
+  dom.editImageWrap.addEventListener('click', onEditImageWrapClick);
 
-  // Image load → reposition overlays
-  dom.modalImage.addEventListener('load', () => {
-    // Wait for layout to settle
+  dom.editImage.addEventListener('load', () => {
     requestAnimationFrame(() => repositionTextItems());
   });
 
-  // Window resize → reposition overlays
   window.addEventListener('resize', () => {
-    if (!dom.modal.classList.contains('hidden')) {
+    if (!dom.editModal.classList.contains('hidden')) {
       repositionTextItems();
     }
   });
@@ -580,10 +574,8 @@
     bgmBtn.title = '开启背景音乐';
   }
 
-  // 尝试自动播放
   playBgm();
 
-  // 如果浏览器阻止自动播放，在首次用户交互时播放
   function tryAutoPlay() {
     if (!bgmPlaying) { playBgm(); }
     document.removeEventListener('click', tryAutoPlay);

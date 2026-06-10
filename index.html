@@ -27,20 +27,31 @@
 
   <div class="content" id="content"></div>
 
-  <!-- 灯箱 -->
+  <!-- 查看灯箱 -->
   <div class="modal-overlay hidden" id="modal">
     <div class="modal-backdrop" id="modalBackdrop"></div>
     <div class="modal-container">
       <button class="modal-close" id="modalClose">✕</button>
-      <div class="modal-image-wrap" id="modalImageWrap">
+      <div class="modal-image-wrap">
         <img id="modalImage" class="modal-image" src="" alt="">
-        <div class="modal-overlays" id="modalOverlays"></div>
       </div>
       <div class="modal-footer">
         <button id="modalEdit" class="edit-btn">✏️ 编辑</button>
         <button id="modalDownload" class="download-btn">下载</button>
       </div>
-      <div class="edit-bar hidden" id="editBar">
+    </div>
+  </div>
+
+  <!-- 编辑灯箱 -->
+  <div class="modal-overlay edit-overlay hidden" id="editModal">
+    <div class="modal-backdrop" id="editBackdrop"></div>
+    <div class="modal-container">
+      <button class="modal-close" id="editClose">✕</button>
+      <div class="modal-image-wrap" id="editImageWrap">
+        <img id="editImage" class="modal-image" src="" alt="">
+        <div class="modal-overlays" id="editOverlays"></div>
+      </div>
+      <div class="edit-bar">
         <div class="edit-controls">
           <label class="edit-label">大小</label>
           <input type="range" id="fontSizeRange" class="edit-range" min="12" max="120" value="36">
@@ -49,6 +60,9 @@
           <input type="color" id="fontColorPicker" class="edit-color" value="#ffffff">
           <button id="deleteTextBtn" class="edit-del-btn" title="删除选中文字">🗑</button>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button id="editDownload" class="download-btn">下载编辑图</button>
       </div>
     </div>
   </div>

@@ -314,7 +314,6 @@ html {
   transition: 0.15s;
 }
 .edit-btn:hover { background: #30363d; color: #e6edf3; }
-.edit-btn.active { background: #238636; border-color: #2ea043; color: #fff; }
 
 .edit-bar {
   border-top: 1px solid #30363d;
@@ -323,7 +322,7 @@ html {
   display: flex;
   align-items: center;
 }
-.edit-bar.hidden { display: none; }
+.edit-overlay { z-index: 1100; }
 
 .edit-controls {
   display: flex;
